@@ -11,6 +11,7 @@ import (
 
 type IProfileController interface {
 	CreateProfile(c echo.Context) error
+	DeleteProfile(c echo.Context) error
 }
 
 type profileController struct {
@@ -36,4 +37,16 @@ func (pc *profileController) CreateProfile(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, profileRes)
+}
+
+func (pc *profileController) DeleteProfile(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userId := claims["user_id"]
+
+	err := pc.pu.DeleteProfile(uint(userId.(float64)))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.NoContent(http.StatusNoContent)
 }
