@@ -8,6 +8,7 @@ import (
 type IProfileUsecase interface {
 	CreateProfile(profile model.Profile) (model.ProfileResponse, error)
 	DeleteProfile(userId uint) error
+	GetProfileByUserId(userId uint)(model.ProfileResponse,error)
 }
 
 type profileUsecase struct {
@@ -39,4 +40,20 @@ func (pu *profileUsecase) DeleteProfile(userId uint) error {
 		return err
 	}
 	return nil
+}
+func(pu *profileUsecase)GetProfileByUserId(userId uint)(model.ProfileResponse,error){
+	profile:= model.Profile{}
+	if err := pu.pr.GetProfileByUserId(&profile,userId); err!=nil{
+		return model.ProfileResponse{},err
+	}
+	resProfile := model.ProfileResponse{
+		ID: profile.ID,
+		Beuraucracy: profile.Beuraucracy,
+		Family: profile.Family,
+		Innovation: profile.Innovation,
+		Market: profile.Market,
+		CreatedAt: profile.CreatedAt,
+		UpdatedAt: profile.UpdatedAt,
+	}
+	return resProfile, nil
 }

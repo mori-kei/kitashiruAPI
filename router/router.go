@@ -18,6 +18,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController) 
 		TokenLookup: "cookie:token",
 	}))
 	t.POST("", pc.CreateProfile)
+	t.GET("",pc.GetProfileByUserId)
 	t.DELETE("", pc.DeleteProfile)
 	return e
 }
