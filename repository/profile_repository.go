@@ -10,6 +10,7 @@ import (
 type IProfileRepository interface {
 	CreateProfile(profile *model.Profile) error
 	DeleteProfile(userId uint) error
+	GetProfileByUserId(profile *model.Profile, userId uint)error
 }
 
 type profileRepository struct {
@@ -34,6 +35,13 @@ func (pr *profileRepository) DeleteProfile(userId uint) error {
 	}
 	if result.RowsAffected < 1 {
 		return fmt.Errorf("object does not exist")
+	}
+	return nil
+}
+
+func(pr *profileRepository)GetProfileByUserId(profile *model.Profile, userId uint)error{
+	if err:= pr.db.Model(profile).Where("user_id",userId).First(profile).Error; err!=nil{
+		return err
 	}
 	return nil
 }
