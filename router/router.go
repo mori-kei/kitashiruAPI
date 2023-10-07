@@ -12,13 +12,14 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController) 
 	e := echo.New()
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
+	e.POST("/logout", uc.LogOut)
 	t := e.Group("/profile")
 	t.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey:  []byte(os.Getenv("SECRET")),
 		TokenLookup: "cookie:token",
 	}))
 	t.POST("", pc.CreateProfile)
-	t.GET("",pc.GetProfileByUserId)
+	t.GET("", pc.GetProfileByUserId)
 	t.DELETE("", pc.DeleteProfile)
 	return e
 }
