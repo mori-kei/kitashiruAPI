@@ -20,6 +20,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController) 
 	}))
 	t.POST("", pc.CreateProfile)
 	t.GET("", pc.GetProfileByUserId)
+	t.PUT("",pc.UpdateProfile)
 	t.DELETE("", pc.DeleteProfile)
 	return e
 }
