@@ -14,6 +14,7 @@ type IUserController interface {
 	SignUp(c echo.Context) error
 	LogIn(c echo.Context) error
 	LogOut(c echo.Context) error
+	CsrfToken(c echo.Context) error
 }
 
 type userController struct {
@@ -41,7 +42,7 @@ func (uc *userController) LogIn(c echo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	tokenString, err := uc.uu.Login(user)
+	userRes,tokenString, err := uc.uu.Login(user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -51,12 +52,12 @@ func (uc *userController) LogIn(c echo.Context) error {
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	cookie.Path = "/"
 	cookie.Domain = os.Getenv("API_DOMAIN")
-	//trueにする必要があるがpostmanで動作確認するために一旦falseに
-	// cookie.Secure = true
+	//↓postmanで動作確認する時はコメントアウトを行い一旦falseにする
+	cookie.Secure = true
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteNoneMode
 	c.SetCookie(cookie)
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusOK,userRes)
 }
 func (uc *userController) LogOut(c echo.Context) error {
 	cookie := new(http.Cookie)
@@ -65,9 +66,17 @@ func (uc *userController) LogOut(c echo.Context) error {
 	cookie.Expires = time.Now()
 	cookie.Path = "/"
 	cookie.Domain = os.Getenv("API_DOMAIN")
-	// cookie.Secure = true
+	//↓postmanで動作確認する時はコメントアウトを行い一旦falseにする
+	cookie.Secure = true
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteNoneMode
 	c.SetCookie(cookie)
 	return c.NoContent(http.StatusOK)
+}
+
+func (uc *userController) CsrfToken(c echo.Context) error {
+	token := c.Get("csrf").(string)
+	return c.JSON(http.StatusOK, echo.Map{
+		"csrf_token": token,
+	})
 }
