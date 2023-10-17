@@ -1,12 +1,14 @@
 package controller
 
 import (
+	"fmt"
 	"kitashiruAPI/model"
 	"kitashiruAPI/usecase"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -80,4 +82,28 @@ func (uc *userController) CsrfToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"csrf_token": token,
 	})
+}
+
+func(uc *userController) GetUserByJwt(c echo.Context)error{
+		cookie, err := c.Cookie("token") // "jwt_cookie_name" は実際のCookieの名前に置き換えてください
+		if err != nil {
+			return err
+		}
+
+		tokenString := cookie.Value
+		fmt.Println(tokenString)
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			// 適切な署名キーを返すためのコードをここに記述する
+			return []byte(os.Getenv("SECRET")), nil
+		})
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			// ペイロードの内容をJSON形式でレスポンスする
+			response := map[string]interface{}{
+				"id": claims["user_id"],
+			}
+			return c.JSON(http.StatusOK, response)
+		} else {
+			return echo.ErrUnauthorized
+		}
 }
