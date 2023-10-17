@@ -1,12 +1,12 @@
 package router
 
 import (
-	"fmt"
+	// "fmt"
 	"kitashiruAPI/controller"
 	"net/http"
 	"os"
 
-	"github.com/dgrijalva/jwt-go"
+	// "github.com/dgrijalva/jwt-go"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -39,29 +39,30 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController) 
 	e.POST("/login", uc.LogIn)
 	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
-	e.GET("/me", func(c echo.Context) error {
-		cookie, err := c.Cookie("token") // "jwt_cookie_name" は実際のCookieの名前に置き換えてください
-		if err != nil {
-			return err
-		}
+	e.GET("/me",uc.GetUserByJwt)
+	// e.GET("/me", func(c echo.Context) error {
+	// 	cookie, err := c.Cookie("token") // "jwt_cookie_name" は実際のCookieの名前に置き換えてください
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		tokenString := cookie.Value
-		fmt.Println(tokenString)
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// 適切な署名キーを返すためのコードをここに記述する
-			return []byte(os.Getenv("SECRET")), nil
-		})
+	// 	tokenString := cookie.Value
+	// 	fmt.Println(tokenString)
+	// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	// 		// 適切な署名キーを返すためのコードをここに記述する
+	// 		return []byte(os.Getenv("SECRET")), nil
+	// 	})
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			// ペイロードの内容をJSON形式でレスポンスする
-			response := map[string]interface{}{
-				"id": claims["user_id"],
-			}
-			return c.JSON(http.StatusOK, response)
-		} else {
-			return echo.ErrUnauthorized
-		}
-	})
+	// 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	// 		// ペイロードの内容をJSON形式でレスポンスする
+	// 		response := map[string]interface{}{
+	// 			"id": claims["user_id"],
+	// 		}
+	// 		return c.JSON(http.StatusOK, response)
+	// 	} else {
+	// 		return echo.ErrUnauthorized
+	// 	}
+	// })
 	p := e.Group("/profile")
 	p.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey:  []byte(os.Getenv("SECRET")),

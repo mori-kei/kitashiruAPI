@@ -15,6 +15,7 @@ type IUserController interface {
 	LogIn(c echo.Context) error
 	LogOut(c echo.Context) error
 	CsrfToken(c echo.Context) error
+	GetUserByJwt(c echo.Context)error
 }
 
 type userController struct {
