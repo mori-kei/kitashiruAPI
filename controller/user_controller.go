@@ -17,7 +17,7 @@ type IUserController interface {
 	LogIn(c echo.Context) error
 	LogOut(c echo.Context) error
 	CsrfToken(c echo.Context) error
-	GetUserByJwt(c echo.Context)error
+	GetUserByJwt(c echo.Context) error
 }
 
 type userController struct {
@@ -45,7 +45,7 @@ func (uc *userController) LogIn(c echo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	userRes,tokenString, err := uc.uu.Login(user)
+	userRes, tokenString, err := uc.uu.Login(user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -60,7 +60,7 @@ func (uc *userController) LogIn(c echo.Context) error {
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteNoneMode
 	c.SetCookie(cookie)
-	return c.JSON(http.StatusOK,userRes)
+	return c.JSON(http.StatusOK, userRes)
 }
 func (uc *userController) LogOut(c echo.Context) error {
 	cookie := new(http.Cookie)
@@ -84,26 +84,28 @@ func (uc *userController) CsrfToken(c echo.Context) error {
 	})
 }
 
-func(uc *userController) GetUserByJwt(c echo.Context)error{
-		cookie, err := c.Cookie("token") // "jwt_cookie_name" は実際のCookieの名前に置き換えてください
-		if err != nil {
-			return err
-		}
+func (uc *userController) GetUserByJwt(c echo.Context) error {
+	cookie, err := c.Cookie("token") // "jwt_cookie_name" は実際のCookieの名前に置き換えてください
+	if err != nil {
+		return err
+	}
 
-		tokenString := cookie.Value
-		fmt.Println(tokenString)
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// 適切な署名キーを返すためのコードをここに記述する
-			return []byte(os.Getenv("SECRET")), nil
-		})
+	tokenString := cookie.Value
+	fmt.Println(tokenString)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// 適切な署名キーを返すためのコードをここに記述する
+		return []byte(os.Getenv("SECRET")), nil
+	})
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			// ペイロードの内容をJSON形式でレスポンスする
-			response := map[string]interface{}{
-				"id": claims["user_id"],
-			}
-			return c.JSON(http.StatusOK, response)
-		} else {
-			return echo.ErrUnauthorized
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		// ペイロードの内容をJSON形式でレスポンスする
+		id := uint(claims["user_id"].(float64)) // float64からuintに変換
+		response := model.UserResponse{
+			ID:    id,
+			Email: claims["email"].(string), // "e-mail" を "email" に修正
 		}
+		return c.JSON(http.StatusOK, response)
+	} else {
+		return echo.ErrUnauthorized
+	}
 }

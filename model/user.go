@@ -16,4 +16,3 @@ type UserResponse struct {
 	Email string `json:"email" gorm:"unique"`
 }
 
-
