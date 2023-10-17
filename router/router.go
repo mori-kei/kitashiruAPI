@@ -29,9 +29,9 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController) 
 		//Postmanで動作確認をする場合はsecure属性をfalseにする必要がある
 		//SameSiteをnonemodeにしてしまうと自動的にsecrureがonになるためPostmanで動作確認する時はsamasiteをDefaultModeに設定する]
 		//↓【通信用】フロントとの通信の際にはコメントアウトを消しPostmanで確認する際はコメントアウトする
-		// CookieSameSite: http.SameSiteNoneMode,
+		CookieSameSite: http.SameSiteNoneMode,
 		//↓【API開発用】Postmanで確認する際はコメントアウトを消しフロントとの通信の際にはコメントアウトする
-		CookieSameSite: http.SameSiteDefaultMode,
+		// CookieSameSite: http.SameSiteDefaultMode,
 		//CookieMaxAgeは秒単位で有効期限を指定できる
 		//CookieMaxAge:   60,
 	}))
@@ -55,7 +55,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController) 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			// ペイロードの内容をJSON形式でレスポンスする
 			response := map[string]interface{}{
-				"user_id": claims["user_id"],
+				"id": claims["user_id"],
 			}
 			return c.JSON(http.StatusOK, response)
 		} else {
