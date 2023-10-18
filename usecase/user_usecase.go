@@ -12,7 +12,8 @@ import (
 
 type IUserUsecase interface {
 	Signup(user model.User) (model.UserResponse, error)
-	Login(user model.User) (model.UserResponse,string, error)
+	Login(user model.User) (model.UserResponse, string, error)
+	GetUserByJwt(tokenString string) (model.UserResponse, error)
 }
 
 type userUsecase struct {
@@ -40,7 +41,7 @@ func (uu *userUsecase) Signup(user model.User) (model.UserResponse, error) {
 	return resUser, nil
 }
 
-func (uu *userUsecase) Login(user model.User) (model.UserResponse,string, error) {
+func (uu *userUsecase) Login(user model.User) (model.UserResponse, string, error) {
 	storedUser := model.User{}
 	if err := uu.ur.GetUserByEmail(&storedUser, user.Email); err != nil {
 		return model.UserResponse{}, "", err
@@ -51,7 +52,7 @@ func (uu *userUsecase) Login(user model.User) (model.UserResponse,string, error)
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": storedUser.ID,
-		"email": storedUser.Email,
+		"email":   storedUser.Email,
 		"exp":     time.Now().Add(time.Hour * 12).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
@@ -59,8 +60,30 @@ func (uu *userUsecase) Login(user model.User) (model.UserResponse,string, error)
 		return model.UserResponse{}, "", err
 	}
 	resUser := model.UserResponse{
-		ID: storedUser.ID,
+		ID:    storedUser.ID,
 		Email: storedUser.Email,
 	}
-	return resUser, tokenString,nil
+	return resUser, tokenString, nil
+}
+
+func (uu *userUsecase) GetUserByJwt(tokenString string) (model.UserResponse, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// 適切な署名キーを返すためのコードをここに記述する
+		return []byte(os.Getenv("SECRET")), nil
+	})
+
+	if err != nil {
+		return model.UserResponse{}, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		id := uint(claims["user_id"].(float64))
+		response := model.UserResponse{
+			ID:    id,
+			Email: claims["email"].(string),
+		}
+		return response, nil
+	} else {
+		return model.UserResponse{}, err
+	}
 }

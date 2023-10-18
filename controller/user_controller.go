@@ -1,14 +1,12 @@
 package controller
 
 import (
-	"fmt"
 	"kitashiruAPI/model"
 	"kitashiruAPI/usecase"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -91,21 +89,11 @@ func (uc *userController) GetUserByJwt(c echo.Context) error {
 	}
 
 	tokenString := cookie.Value
-	fmt.Println(tokenString)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// 適切な署名キーを返すためのコードをここに記述する
-		return []byte(os.Getenv("SECRET")), nil
-	})
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		// ペイロードの内容をJSON形式でレスポンスする
-		id := uint(claims["user_id"].(float64)) // float64からuintに変換
-		response := model.UserResponse{
-			ID:    id,
-			Email: claims["email"].(string), // "e-mail" を "email" に修正
-		}
-		return c.JSON(http.StatusOK, response)
-	} else {
-		return echo.ErrUnauthorized
+	userResp, err := uc.uu.GetUserByJwt(tokenString)
+	if err != nil {
+		return err
 	}
+
+	return c.JSON(http.StatusOK, userResp)
 }
