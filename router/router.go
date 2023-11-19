@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func NewRouter(uc controller.IUserController, pc controller.IProfileController) *echo.Echo {
+func NewRouter(uc controller.IUserController, pc controller.IProfileController, ac controller.IAdminController) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
@@ -35,11 +35,15 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController) 
 		//CookieMaxAgeは秒単位で有効指定できる
 		//CookieMaxAge:   60,
 	}))
+	//admin
+	e.POST("/admin/signup", ac.SignUp)
+	//user
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
 	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
-	e.GET("/me",uc.GetUserByJwt)
+	e.GET("/me", uc.GetUserByJwt)
+	//profilegroup
 	p := e.Group("/profile")
 	p.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey:  []byte(os.Getenv("SECRET")),
