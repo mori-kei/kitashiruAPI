@@ -14,14 +14,17 @@ func main() {
 	useRepository := repository.NewUserRepository(db)
 	profileRepository := repository.NewProfileRepository(db)
 	adminRepository := repository.NewAdminRepository(db)
+	authRepository := repository.NewAuthRepository(db)
 	//usecase
 	userUsecase := usecase.NewUserUsecase(useRepository)
 	profileUsecase := usecase.NewProfileUsecase(profileRepository)
 	adminUsecase := usecase.NewAdminUsecase(adminRepository)
+	authUsecase := usecase.NewAuthUsecase(authRepository)
 	//controller
 	userController := controller.NewUserController(userUsecase)
 	profileController := controller.NewProfileController(profileUsecase)
 	adminController := controller.NewAdminController(adminUsecase)
-	e := router.NewRouter(userController, profileController, adminController)
+	authContoroller := controller.NewAuthController(authUsecase)
+	e := router.NewRouter(userController, profileController, adminController, authContoroller)
 	e.Logger.Fatal(e.Start(":8080"))
 }
