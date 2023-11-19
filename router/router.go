@@ -7,12 +7,50 @@ import (
 	"os"
 
 	// "github.com/dgrijalva/jwt-go"
+
+	"github.com/golang-jwt/jwt"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func NewRouter(uc controller.IUserController, pc controller.IProfileController, ac controller.IAdminController) *echo.Echo {
+//maybe-later:責務と関心を分離させる
+func AdminOnlyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie, err := c.Cookie("token")
+		if err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Token not found")
+		}
+
+		tokenString := cookie.Value
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			// 適切な署名キーを返すためのコードをここに記述する
+			return []byte(os.Getenv("SECRET")), nil
+		})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+		}
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			userType, ok := claims["user_type"].(string)
+			if !ok {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid user type")
+			}
+
+			// userTypeがadminでない場合はエラーを返す
+			if userType != "admin" {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Admin access only")
+			}
+
+			// userTypeがadminの場合は次のハンドラを呼び出す
+			return next(c)
+		}
+
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token claims")
+	}
+}
+
+func NewRouter(uc controller.IUserController, pc controller.IProfileController, ac controller.IAdminController, auc controller.IAuthController) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
@@ -29,12 +67,13 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 		//Postmanで動作確認をする場合はsecure属性をfalseにする必要がある
 		//SameSiteをnonemodeにしてしまうと自動的にsecrureがonになるためPostmanで動作確認する時はsamasiteをDefaultModeに設定する]
 		//↓【通信用】フロントとの通信の際にはコメントアウトを消しPostmanで確認する際はコメントアウトする
-		CookieSameSite: http.SameSiteNoneMode,
+		// CookieSameSite: http.SameSiteNoneMode,
 		//↓【API開発用】Postmanで確認する際はコメントアウトを消しフロントとの通信の際にはコメントアウトする
-		// CookieSameSite: http.SameSiteDefaultMode,
+		CookieSameSite: http.SameSiteDefaultMode,
 		//CookieMaxAgeは秒単位で有効指定できる
 		//CookieMaxAge:   60,
 	}))
+
 	//admin
 	e.POST("/admin/signup", ac.SignUp)
 	e.POST("/admin/login", ac.LogIn)
@@ -43,7 +82,11 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	e.POST("/login", uc.LogIn)
 	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
-	e.GET("/me", uc.GetUserByJwt)
+	e.GET("/me", uc.GetUserByJwt, AdminOnlyMiddleware)
+	e.GET("/auth", auc.GetAuthByJwt)
+	e.GET("/test", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Admin Access Granted")
+	}, AdminOnlyMiddleware)
 	//profilegroup
 	p := e.Group("/profile")
 	p.Use(echojwt.WithConfig(echojwt.Config{
