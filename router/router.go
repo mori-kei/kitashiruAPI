@@ -75,8 +75,10 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	}))
 
 	//admin
-	e.POST("/admin/signup", ac.SignUp)
-	e.POST("/admin/login", ac.LogIn)
+	a := e.Group("/admin")
+	a.POST("/signup", ac.SignUp)
+	a.POST("/login", ac.LogIn)
+	a.POST("/logout", ac.Logout)
 	//user
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
