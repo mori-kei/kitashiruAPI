@@ -1,13 +1,18 @@
 package model
 
+import "time"
+
 type Article struct {
-	ID              uint
-	Url             string
-	OverView        string
-	Message         string
-	appeal          string
-	Capital         int
-	Earning         int
-	Employee_number int
-	Address         string
+	ID            uint      `json:"id" gorm:"primaryKey"`
+	Url           string    `json:"url"`
+	OverView      string    `json:"overview"`
+	Message       string    `json:"message"`
+	Appeal        string    `json:"appeal"`
+	CapitalAmount int       `json:"capital_amount"`
+	EarningAmount int       `json:"earning_amount"`
+	CompanySize   int       `json:"company_size"`
+	Address       string    `json:"address"`
+	IsPublished   bool      `json:"is_published" gorm:"default:true"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
