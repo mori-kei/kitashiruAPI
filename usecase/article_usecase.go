@@ -7,6 +7,7 @@ import (
 
 type IArticleUsecase interface {
 	CreateArticle(article model.Article) (model.Article, error)
+	GetPublishedAlticles() ([]model.Article, error)
 }
 
 type articleUsecase struct {
@@ -35,5 +36,9 @@ func (au *articleUsecase) CreateArticle(article model.Article) (model.Article, e
 		CreatedAt:     article.CreatedAt,
 		UpdatedAt:     article.UpdatedAt,
 	}
-	return resArticle,nil
+	return resArticle, nil
+}
+func (au *articleUsecase) GetPublishedAlticles() ([]model.Article, error) {
+	return au.ar.GetPublishedAlticles()
+
 }

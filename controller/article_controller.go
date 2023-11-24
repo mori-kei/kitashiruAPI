@@ -10,6 +10,7 @@ import (
 
 type IArticleController interface {
 	CreateArticle(c echo.Context) error
+	GetPublishedArticles(c echo.Context) error
 }
 
 type articleController struct {
@@ -31,4 +32,11 @@ func (ac *articleController) CreateArticle(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, articleRes)
+}
+func (ac *articleController) GetPublishedArticles(c echo.Context) error {
+	publishedArticles, err := ac.au.GetPublishedAlticles()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, publishedArticles)
 }

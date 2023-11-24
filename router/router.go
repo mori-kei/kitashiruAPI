@@ -90,6 +90,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	e.GET("/test", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Admin Access Granted")
 	}, AdminOnlyMiddleware)
+	e.GET("/articles", arc.GetPublishedArticles)
 	//profilegroup
 	p := e.Group("/profile")
 	p.Use(echojwt.WithConfig(echojwt.Config{
