@@ -50,7 +50,7 @@ func AdminOnlyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func NewRouter(uc controller.IUserController, pc controller.IProfileController, ac controller.IAdminController, auc controller.IAuthController) *echo.Echo {
+func NewRouter(uc controller.IUserController, pc controller.IProfileController, ac controller.IAdminController, auc controller.IAuthController, arc controller.IArticleController) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
@@ -79,6 +79,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	a.POST("/signup", ac.SignUp)
 	a.POST("/login", ac.LogIn)
 	a.POST("/logout", ac.Logout)
+	a.POST("/article", arc.CreateArticle, AdminOnlyMiddleware)
 	//user
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
