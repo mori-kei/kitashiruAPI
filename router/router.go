@@ -85,7 +85,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	e.POST("/login", uc.LogIn)
 	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
-	e.GET("/me", uc.GetUserByJwt, AdminOnlyMiddleware)
+	e.GET("/me", uc.GetUserByJwt)
 	e.GET("/auth", auc.GetAuthByJwt)
 	e.GET("/test", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Admin Access Granted")

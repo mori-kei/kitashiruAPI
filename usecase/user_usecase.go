@@ -12,7 +12,7 @@ import (
 
 type IUserUsecase interface {
 	Signup(user model.User) (model.UserResponse, error)
-	Login(user model.User) (model.UserResponse, string, error)
+	Login(user model.User) (model.AuthResponse, string, error)
 	GetUserByJwt(tokenString string) (model.UserResponse, error)
 }
 
@@ -41,14 +41,14 @@ func (uu *userUsecase) Signup(user model.User) (model.UserResponse, error) {
 	return resUser, nil
 }
 
-func (uu *userUsecase) Login(user model.User) (model.UserResponse, string, error) {
+func (uu *userUsecase) Login(user model.User) (model.AuthResponse, string, error) {
 	storedUser := model.User{}
 	if err := uu.ur.GetUserByEmail(&storedUser, user.Email); err != nil {
-		return model.UserResponse{}, "", err
+		return model.AuthResponse{}, "", err
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
 	if err != nil {
-		return model.UserResponse{}, "", err
+		return model.AuthResponse{}, "", err
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id":   storedUser.ID,
@@ -58,11 +58,12 @@ func (uu *userUsecase) Login(user model.User) (model.UserResponse, string, error
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 	if err != nil {
-		return model.UserResponse{}, "", err
+		return model.AuthResponse{}, "", err
 	}
-	resUser := model.UserResponse{
-		ID:    storedUser.ID,
-		Email: storedUser.Email,
+	resUser := model.AuthResponse{
+		ID:        storedUser.ID,
+		Email:     storedUser.Email,
+		User_type: "user",
 	}
 	return resUser, tokenString, nil
 }
