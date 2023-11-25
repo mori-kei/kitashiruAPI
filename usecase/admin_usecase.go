@@ -12,7 +12,7 @@ import (
 
 type IAdminUsecase interface {
 	SignUp(admin model.Admin) (model.AdminResponse, error)
-	Login(admin model.Admin) (model.AdminResponse, string, error)
+	Login(admin model.Admin) (model.AuthResponse, string, error)
 }
 
 type adminUsecase struct {
@@ -40,15 +40,15 @@ func (au *adminUsecase) SignUp(admin model.Admin) (model.AdminResponse, error) {
 	return resAdmin, nil
 }
 
-func (au *adminUsecase) Login(admin model.Admin) (model.AdminResponse, string, error) {
+func (au *adminUsecase) Login(admin model.Admin) (model.AuthResponse, string, error) {
 	storedAdmin := model.Admin{}
 	if err := au.ar.GetUserByEmail(&storedAdmin, admin.Email); err != nil {
-		return model.AdminResponse{}, "", err
+		return model.AuthResponse{}, "", err
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(
 		storedAdmin.Password), []byte(admin.Password))
 	if err != nil {
-		return model.AdminResponse{}, "", err
+		return model.AuthResponse{}, "", err
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id":   storedAdmin.ID,
@@ -58,11 +58,12 @@ func (au *adminUsecase) Login(admin model.Admin) (model.AdminResponse, string, e
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 	if err != nil {
-		return model.AdminResponse{}, "", err
+		return model.AuthResponse{}, "", err
 	}
-	resAdmin := model.AdminResponse{
-		ID:    storedAdmin.ID,
-		Email: storedAdmin.Email,
+	resAdmin := model.AuthResponse{
+		ID:        storedAdmin.ID,
+		Email:     storedAdmin.Email,
+		User_type: "admin",
 	}
-	return resAdmin,tokenString,nil
+	return resAdmin, tokenString, nil
 }
