@@ -22,18 +22,22 @@ func (au *articleUsecase) CreateArticle(article model.Article) (model.Article, e
 		return model.Article{}, err
 	}
 	resArticle := model.Article{
-		ID:            article.ID,
-		Url:           article.Url,
-		OverView:      article.OverView,
-		Message:       article.Message,
-		Appeal:        article.Appeal,
-		CapitalAmount: article.CapitalAmount,
-		EarningAmount: article.EarningAmount,
-		CompanySize:   article.CompanySize,
-		Address:       article.Address,
-		IsPublished:   article.IsPublished,
-		CreatedAt:     article.CreatedAt,
-		UpdatedAt:     article.UpdatedAt,
+		ID:              article.ID,
+		Url:             article.Url,
+		OverView:        article.OverView,
+		Message:         article.Message,
+		Appeal:          article.Appeal,
+		CapitalAmount:   article.CapitalAmount,
+		EarningAmount:   article.EarningAmount,
+		CompanySize:     article.CompanySize,
+		Address:         article.Address,
+		IsPublished:     article.IsPublished,
+		FamilyPoint:     article.FamilyPoint,
+		InnovationPoint: article.InnovationPoint,
+		MarketPoint:     article.MarketPoint,
+		BurePoint:       article.BurePoint,
+		CreatedAt:       article.CreatedAt,
+		UpdatedAt:       article.UpdatedAt,
 	}
-	return resArticle,nil
+	return resArticle, nil
 }
