@@ -87,9 +87,17 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	e.GET("/csrf", uc.CsrfToken)
 	e.GET("/me", uc.GetUserByJwt)
 	e.GET("/auth", auc.GetAuthByJwt)
+
 	e.GET("/test", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Admin Access Granted")
 	}, AdminOnlyMiddleware)
+	//articlegroup
+	ar := e.Group("/article")
+	ar.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey:  []byte(os.Getenv("SECRET")),
+		TokenLookup: "cookie:token",
+	}))
+	ar.GET("", arc.GetMatchArticles)
 	//profilegroup
 	p := e.Group("/profile")
 	p.Use(echojwt.WithConfig(echojwt.Config{

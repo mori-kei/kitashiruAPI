@@ -58,7 +58,7 @@ func (pr *profileRepository) DeleteProfile(userId uint) error {
 }
 
 func (pr *profileRepository) GetProfileByUserId(profile *model.Profile, userId uint) error {
-	if err := pr.db.Model(profile).Where("user_id", userId).First(profile).Error; err != nil {
+	if err := pr.db.Model(profile).Where("user_id", userId).Last(profile).Error; err != nil {
 		return err
 	}
 	return nil
