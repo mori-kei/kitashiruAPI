@@ -3,18 +3,21 @@ package usecase
 import (
 	"kitashiruAPI/model"
 	"kitashiruAPI/repository"
+	"sort"
 )
 
 type IArticleUsecase interface {
 	CreateArticle(article model.Article) (model.Article, error)
+	GetMatchArticles(userId uint) ([]model.Article, error)
 }
 
 type articleUsecase struct {
 	ar repository.IArticleRepository
+	pr repository.IProfileRepository
 }
 
-func NewArticleUsecase(ar repository.IArticleRepository) IArticleUsecase {
-	return &articleUsecase{ar}
+func NewArticleUsecase(ar repository.IArticleRepository, pr repository.IProfileRepository) IArticleUsecase {
+	return &articleUsecase{ar, pr}
 }
 
 func (au *articleUsecase) CreateArticle(article model.Article) (model.Article, error) {
@@ -22,18 +25,59 @@ func (au *articleUsecase) CreateArticle(article model.Article) (model.Article, e
 		return model.Article{}, err
 	}
 	resArticle := model.Article{
-		ID:            article.ID,
-		Url:           article.Url,
-		OverView:      article.OverView,
-		Message:       article.Message,
-		Appeal:        article.Appeal,
-		CapitalAmount: article.CapitalAmount,
-		EarningAmount: article.EarningAmount,
-		CompanySize:   article.CompanySize,
-		Address:       article.Address,
-		IsPublished:   article.IsPublished,
-		CreatedAt:     article.CreatedAt,
-		UpdatedAt:     article.UpdatedAt,
+		ID:              article.ID,
+		Url:             article.Url,
+		OverView:        article.OverView,
+		Message:         article.Message,
+		Appeal:          article.Appeal,
+		CapitalAmount:   article.CapitalAmount,
+		EarningAmount:   article.EarningAmount,
+		CompanySize:     article.CompanySize,
+		Address:         article.Address,
+		IsPublished:     article.IsPublished,
+		FamilyPoint:     article.FamilyPoint,
+		InnovationPoint: article.InnovationPoint,
+		MarketPoint:     article.MarketPoint,
+		BurePoint:       article.BurePoint,
+		CreatedAt:       article.CreatedAt,
+		UpdatedAt:       article.UpdatedAt,
 	}
-	return resArticle,nil
+	return resArticle, nil
+}
+
+func (au *articleUsecase) GetMatchArticles(userId uint) ([]model.Article, error) {
+	profile := model.Profile{}
+	if err := au.pr.GetProfileByUserId(&profile, userId); err != nil {
+		return nil, err
+	}
+	articles, err := au.ar.GetAllArticles()
+	if err != nil {
+		return nil, err
+	}
+	// 計算した絶対値の合計を格納するためのマップ
+	articleDiff := make(map[uint]int)
+
+	// ユーザープロフィールとArticleのポイントの差分を計算し、合計を算出
+	for _, article := range articles {
+		diff := Abs(int(profile.Beuraucracy) - article.BurePoint)
+		diff += Abs(int(profile.Family) - article.FamilyPoint)
+		diff += Abs(int(profile.Innovation) - article.InnovationPoint)
+		diff += Abs(int(profile.Market) - article.MarketPoint)
+
+		articleDiff[article.ID] = diff
+	}
+
+	// 計算結果を基にArticleをソートする
+	sort.Slice(articles, func(i, j int) bool {
+		return articleDiff[articles[i].ID] < articleDiff[articles[j].ID]
+	})
+
+	return articles, nil
+}
+
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

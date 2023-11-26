@@ -5,11 +5,13 @@ import (
 	"kitashiruAPI/usecase"
 	"net/http"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
 type IArticleController interface {
 	CreateArticle(c echo.Context) error
+	GetMatchArticles(c echo.Context) error
 }
 
 type articleController struct {
@@ -31,4 +33,28 @@ func (ac *articleController) CreateArticle(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, articleRes)
+}
+
+func (ac *articleController) GetMatchArticles(c echo.Context) error {
+	user := c.Get("user")
+	if user == nil {
+		return c.JSON(http.StatusBadRequest, "User token not found")
+	}
+
+	claims, ok := user.(*jwt.Token).Claims.(jwt.MapClaims)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "Invalid user token")
+	}
+
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "Invalid user ID in token")
+	}
+
+	articles, err := ac.au.GetMatchArticles(uint(userID))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, articles)
 }
