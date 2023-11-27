@@ -3,12 +3,15 @@ package usecase
 import (
 	"kitashiruAPI/model"
 	"kitashiruAPI/repository"
+	"math/rand"
 	"sort"
+	"time"
 )
 
 type IArticleUsecase interface {
 	CreateArticle(article model.Article) (model.Article, error)
 	GetMatchArticles(userId uint) ([]model.Article, error)
+	GetAllArticlesRandom() ([]model.Article, error)
 }
 
 type articleUsecase struct {
@@ -75,9 +78,25 @@ func (au *articleUsecase) GetMatchArticles(userId uint) ([]model.Article, error)
 	return articles, nil
 }
 
+func (au *articleUsecase) GetAllArticlesRandom() ([]model.Article, error) {
+	articles, err := au.ar.GetAllArticles()
+	if err != nil {
+		return nil, err
+	}
+	shuffleArticles(articles)
+	return articles, nil
+}
+
 func Abs(x int) int {
 	if x < 0 {
 		return -x
 	}
 	return x
+}
+
+func shuffleArticles(articles []model.Article) {
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(articles), func(i, j int) {
+		articles[i], articles[j] = articles[j], articles[i]
+	})
 }
