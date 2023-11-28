@@ -6,7 +6,7 @@ import (
 )
 
 type IProfileUsecase interface {
-	CreateProfile(profile model.Profile) (model.ProfileResponse, error)
+	CreateProfile(userId uint, profile model.Profile) (model.ProfileResponse, error)
 	UpdateProfile(profile model.Profile, userId uint) (model.ProfileResponse, error)
 	DeleteProfile(userId uint) error
 	GetProfileByUserId(userId uint) (model.ProfileResponse, error)
@@ -20,8 +20,8 @@ func NewProfileUsecase(pr repository.IProfileRepository) IProfileUsecase {
 	return &profileUsecase{pr}
 }
 
-func (pu *profileUsecase) CreateProfile(profile model.Profile) (model.ProfileResponse, error) {
-	if err := pu.pr.CreateProfile(&profile); err != nil {
+func (pu *profileUsecase) CreateProfile(userId uint, profile model.Profile) (model.ProfileResponse, error) {
+	if err := pu.pr.CreateProfile(userId, &profile); err != nil {
 		return model.ProfileResponse{}, err
 	}
 	resProfile := model.ProfileResponse{

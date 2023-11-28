@@ -34,7 +34,7 @@ func (pc *profileController) CreateProfile(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 	profile.UserID = uint(userId.(float64))
-	profileRes, err := pc.pu.CreateProfile(profile)
+	profileRes, err := pc.pu.CreateProfile(uint(userId.(float64)), profile)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

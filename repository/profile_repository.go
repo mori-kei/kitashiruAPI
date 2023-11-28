@@ -9,7 +9,7 @@ import (
 )
 
 type IProfileRepository interface {
-	CreateProfile(profile *model.Profile) error
+	CreateProfile(userId uint, profile *model.Profile) error
 	UpdateProfile(profile *model.Profile, userId uint) error
 	DeleteProfile(userId uint) error
 	GetProfileByUserId(profile *model.Profile, userId uint) error
@@ -23,10 +23,22 @@ func NewProfileRepository(db *gorm.DB) IProfileRepository {
 	return &profileRepository{db}
 }
 
-func (pr *profileRepository) CreateProfile(profile *model.Profile) error {
-	if err := pr.db.Create(profile).Error; err != nil {
-		return err
+func (pr *profileRepository) CreateProfile(userId uint, profile *model.Profile) error {
+	// ユーザーIDに対応するプロフィールを検索する
+	existingProfile := &model.Profile{}
+	if err := pr.db.Where("user_id = ?", userId).First(existingProfile).Error; err != nil {
+		// プロフィールが見つからない場合は新しいプロフィールを作成する
+		if err := pr.db.Create(profile).Error; err != nil {
+			return err
+		}
+	} else {
+		// プロフィールが見つかった場合は既存のプロフィールを上書きする
+		profile.ID = existingProfile.ID // 既存のプロフィールのIDを設定して上書きする
+		if err := pr.db.Save(profile).Error; err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
