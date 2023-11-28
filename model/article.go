@@ -4,6 +4,7 @@ import "time"
 
 type Article struct {
 	ID              uint      `json:"id" gorm:"primaryKey"`
+	Name            string    `json:"name" `
 	Url             string    `json:"url"`
 	OverView        string    `json:"overview"`
 	Message         string    `json:"message"`

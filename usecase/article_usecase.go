@@ -12,6 +12,7 @@ type IArticleUsecase interface {
 	CreateArticle(article model.Article) (model.Article, error)
 	GetMatchArticles(userId uint) ([]model.Article, error)
 	GetAllArticlesRandom() ([]model.Article, error)
+	GetArticle(articleId uint) (model.Article, error)
 }
 
 type articleUsecase struct {
@@ -85,6 +86,15 @@ func (au *articleUsecase) GetAllArticlesRandom() ([]model.Article, error) {
 	}
 	shuffleArticles(articles)
 	return articles, nil
+}
+
+func (au *articleUsecase) GetArticle(articleId uint) (model.Article, error) {
+	article := model.Article{}
+
+	if err := au.ar.GetArticle(&article, articleId); err != nil {
+		return model.Article{}, err
+	}
+	return article, nil
 }
 
 func Abs(x int) int {

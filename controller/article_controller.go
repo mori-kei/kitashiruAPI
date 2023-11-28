@@ -4,6 +4,7 @@ import (
 	"kitashiruAPI/model"
 	"kitashiruAPI/usecase"
 	"net/http"
+	"strconv"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -13,6 +14,7 @@ type IArticleController interface {
 	CreateArticle(c echo.Context) error
 	GetMatchArticles(c echo.Context) error
 	GetAllArticleRandom(c echo.Context) error
+	GetArticle(c echo.Context) error
 }
 
 type articleController struct {
@@ -66,4 +68,13 @@ func (ac *articleController) GetAllArticleRandom(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, articles)
+}
+func (ac *articleController) GetArticle(c echo.Context) error {
+	id := c.Param("articleId")
+	articleId, _ := strconv.Atoi(id)
+	articleRes, err := ac.au.GetArticle(uint(articleId))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, articleRes)
 }

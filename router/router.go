@@ -98,6 +98,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 		TokenLookup: "cookie:token",
 	}))
 	ar.GET("", arc.GetMatchArticles)
+	ar.GET("/:articleId", arc.GetArticle)
 	ar.GET("/random", arc.GetAllArticleRandom)
 	//profilegroup
 	p := e.Group("/profile")
