@@ -79,7 +79,8 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	a.POST("/signup", ac.SignUp)
 	a.POST("/login", ac.LogIn)
 	a.POST("/logout", ac.Logout)
-	a.POST("/article", arc.CreateArticle, AdminOnlyMiddleware)
+	// a.POST("/article", arc.CreateArticle, AdminOnlyMiddleware)
+	a.POST("/article", arc.CreateArticle)
 	//user
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
