@@ -64,6 +64,11 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 		CookieDomain:   os.Getenv("API_DOMAIN"),
 		CookieHTTPOnly: true,
 
+		Skipper: func(c echo.Context) bool {
+			// 特定のルートを除外する場合などに使う、スキップする条件を設定
+
+			return c.Path() == "/login" || c.Path() == "/signup"
+		},
 		//Postmanで動作確認をする場合はsecure属性をfalseにする必要がある
 		//SameSiteをnonemodeにしてしまうと自動的にsecrureがonになるためPostmanで動作確認する時はsamasiteをDefaultModeに設定する]
 		//↓【通信用】フロントとの通信の際にはコメントアウトを消しPostmanで確認する際はコメントアウトする
