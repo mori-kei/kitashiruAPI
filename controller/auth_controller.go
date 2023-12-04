@@ -22,7 +22,8 @@ func NewAuthController(au usecase.IAuthUsecase) IAuthController {
 func (ac *authController) GetAuthByJwt(c echo.Context) error {
 	cookie, err := c.Cookie("token")
 	if err != nil {
-		return err
+
+		return c.JSON(http.StatusOK, nil)
 	}
 	tokenString := cookie.Value
 
