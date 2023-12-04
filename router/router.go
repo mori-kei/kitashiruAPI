@@ -73,7 +73,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 		//SameSiteをnonemodeにしてしまうと自動的にsecrureがonになるためPostmanで動作確認する時はsamasiteをDefaultModeに設定する]
 		//↓【通信用】フロントとの通信の際にはコメントアウトを消しPostmanで確認する際はコメントアウトする
 		CookieSameSite: http.SameSiteNoneMode,
-		CookieSecure:   false,
+		CookieSecure:   true,
 		//↓【API開発用】Postmanで確認する際はコメントアウトを消しフロントとの通信の際にはコメントアウトする
 		// CookieSameSite: http.SameSiteDefaultMode,
 		//CookieMaxAgeは秒単位で有効指定できる
