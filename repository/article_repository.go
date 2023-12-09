@@ -4,12 +4,14 @@ import (
 	"kitashiruAPI/model"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type IArticleRepository interface {
 	CreateArticle(article *model.Article) error
 	GetAllArticles() ([]model.Article, error)
 	GetArticle(article *model.Article, articleId uint) error
+	UpdateArticle(article *model.Article, articleId uint) error
 }
 
 type articleRepository struct {
@@ -38,6 +40,13 @@ func (ar *articleRepository) GetAllArticles() ([]model.Article, error) {
 func (ar *articleRepository) GetArticle(article *model.Article, articleId uint) error {
 	if err := ar.db.Model(article).Where("id", articleId).First(article).Error; err != nil {
 		return err
+	}
+	return nil
+}
+func (ar *articleRepository) UpdateArticle(article *model.Article, articleId uint) error {
+	result := ar.db.Model(article).Clauses(clause.Returning{}).Where("id", articleId).Updates(article)
+	if result.Error != nil {
+		return result.Error
 	}
 	return nil
 }

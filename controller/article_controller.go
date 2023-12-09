@@ -15,6 +15,7 @@ type IArticleController interface {
 	GetMatchArticles(c echo.Context) error
 	GetAllPublicArticleRandom(c echo.Context) error
 	GetArticle(c echo.Context) error
+	UpdateArticle(c echo.Context) error
 }
 
 type articleController struct {
@@ -73,6 +74,20 @@ func (ac *articleController) GetArticle(c echo.Context) error {
 	id := c.Param("articleId")
 	articleId, _ := strconv.Atoi(id)
 	articleRes, err := ac.au.GetArticle(uint(articleId))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, articleRes)
+}
+
+func (ac *articleController) UpdateArticle(c echo.Context) error {
+	article := model.Article{}
+	if err := c.Bind(&article); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	id := c.Param("articleId")
+	articleId, _ := strconv.Atoi(id)
+	articleRes, err := ac.au.UpdateArticle(article, uint(articleId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

@@ -99,14 +99,16 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 		return c.String(http.StatusOK, "Admin Access Granted")
 	}, AdminOnlyMiddleware)
 	//articlegroup
-	ar := e.Group("/articles")
-	ar.Use(echojwt.WithConfig(echojwt.Config{
+	articles := e.Group("/articles")
+	articles.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey:  []byte(os.Getenv("SECRET")),
 		TokenLookup: "cookie:token",
 	}))
-	ar.GET("", arc.GetMatchArticles)
-	ar.GET("/:articleId", arc.GetArticle)
-	ar.GET("/random", arc.GetAllPublicArticleRandom)
+	articles.GET("", arc.GetMatchArticles)
+	articles.GET("/:articleId", arc.GetArticle)
+	articles.GET("/random", arc.GetAllPublicArticleRandom)
+	articles.PUT("/:articleId", arc.UpdateArticle)
+
 	//profilegroup
 	p := e.Group("/profile")
 	p.Use(echojwt.WithConfig(echojwt.Config{
