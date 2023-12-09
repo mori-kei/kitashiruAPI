@@ -106,7 +106,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	}))
 	ar.GET("", arc.GetMatchArticles)
 	ar.GET("/:articleId", arc.GetArticle)
-	ar.GET("/random", arc.GetAllArticleRandom)
+	ar.GET("/random", arc.GetAllPublicArticleRandom)
 	//profilegroup
 	p := e.Group("/profile")
 	p.Use(echojwt.WithConfig(echojwt.Config{
