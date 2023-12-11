@@ -104,7 +104,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 		SigningKey:  []byte(os.Getenv("SECRET")),
 		TokenLookup: "cookie:token",
 	}))
-	articles.GET("", arc.GetMatchArticles)
+	articles.GET("/match", arc.GetMatchArticles)
 	articles.GET("/:articleId", arc.GetArticle)
 	articles.GET("/random", arc.GetAllPublicArticleRandom)
 	articles.PUT("/:articleId", arc.UpdateArticle)
