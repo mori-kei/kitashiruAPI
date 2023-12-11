@@ -10,6 +10,7 @@ import (
 type IArticleRepository interface {
 	CreateArticle(article *model.Article) error
 	GetAllArticles() ([]model.Article, error)
+	GetAllPublicArticles() ([]model.Article, error)
 	GetArticle(article *model.Article, articleId uint) error
 	UpdateArticle(article *model.Article, articleId uint) error
 }
@@ -36,7 +37,13 @@ func (ar *articleRepository) GetAllArticles() ([]model.Article, error) {
 	}
 	return articles, nil
 }
-
+func (ar *articleRepository) GetAllPublicArticles() ([]model.Article, error) {
+	var articles []model.Article
+	if err := ar.db.Where("is_published =?", "true").Find(&articles).Error; err != nil {
+		return nil, err
+	}
+	return articles, nil
+}
 func (ar *articleRepository) GetArticle(article *model.Article, articleId uint) error {
 	if err := ar.db.Model(article).Where("id", articleId).First(article).Error; err != nil {
 		return err
