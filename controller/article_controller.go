@@ -13,7 +13,9 @@ import (
 type IArticleController interface {
 	CreateArticle(c echo.Context) error
 	GetMatchArticles(c echo.Context) error
+	GetAllArticles(c echo.Context) error
 	GetAllPublicArticleRandom(c echo.Context) error
+
 	GetArticle(c echo.Context) error
 	UpdateArticle(c echo.Context) error
 }
@@ -62,7 +64,13 @@ func (ac *articleController) GetMatchArticles(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, articles)
 }
-
+func (ac *articleController) GetAllArticles(c echo.Context) error {
+	articles, err := ac.au.GetAllArticles()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, articles)
+}
 func (ac *articleController) GetAllPublicArticleRandom(c echo.Context) error {
 	articles, err := ac.au.GetAllArticlesRandom()
 	if err != nil {
