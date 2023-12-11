@@ -81,7 +81,7 @@ func (au *articleUsecase) GetMatchArticles(userId uint) ([]model.Article, error)
 }
 
 func (au *articleUsecase) GetAllArticlesRandom() ([]model.Article, error) {
-	articles, err := au.ar.GetAllArticles()
+	articles, err := au.ar.GetAllPublicArticles()
 	if err != nil {
 		return nil, err
 	}
