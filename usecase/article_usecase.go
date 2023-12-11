@@ -56,7 +56,7 @@ func (au *articleUsecase) GetMatchArticles(userId uint) ([]model.Article, error)
 	if err := au.pr.GetProfileByUserId(&profile, userId); err != nil {
 		return nil, err
 	}
-	articles, err := au.ar.GetAllArticles()
+	articles, err := au.ar.GetAllPublicArticles()
 	if err != nil {
 		return nil, err
 	}
