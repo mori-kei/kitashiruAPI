@@ -11,6 +11,7 @@ import (
 type IArticleUsecase interface {
 	CreateArticle(article model.Article) (model.Article, error)
 	GetMatchArticles(userId uint) ([]model.Article, error)
+	GetAllArticles() ([]model.Article, error)
 	GetAllArticlesRandom() ([]model.Article, error)
 	GetArticle(articleId uint) (model.Article, error)
 	UpdateArticle(article model.Article, articleId uint) (model.Article, error)
@@ -77,6 +78,13 @@ func (au *articleUsecase) GetMatchArticles(userId uint) ([]model.Article, error)
 		return articleDiff[articles[i].ID] < articleDiff[articles[j].ID]
 	})
 
+	return articles, nil
+}
+func (au *articleUsecase) GetAllArticles() ([]model.Article, error) {
+	articles, err := au.ar.GetAllArticles()
+	if err != nil {
+		return nil, err
+	}
 	return articles, nil
 }
 
