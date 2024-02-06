@@ -13,11 +13,15 @@ type Article struct {
 	EarningAmount   int       `json:"earning_amount"`
 	CompanySize     int       `json:"company_size"`
 	Address         string    `json:"address"`
-	IsPublished     *bool      `json:"is_published" gorm:"default:true"`
+	IsPublished     *bool     `json:"is_published" gorm:"default:true"`
 	FamilyPoint     int       `json:"family_point"`
 	InnovationPoint int       `json:"innovation_point"`
 	MarketPoint     int       `json:"market_point"`
 	BurePoint       int       `json:"bure_point"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
+}
+type ArticleWithLikedStatus struct {
+	Article
+	Liked bool `json:"is_liked"`
 }
