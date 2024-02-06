@@ -10,7 +10,7 @@ import (
 
 type IArticleUsecase interface {
 	CreateArticle(article model.Article) (model.Article, error)
-	GetMatchArticles(userId uint) ([]model.Article, error)
+	GetMatchArticles(userId uint) ([]model.ArticleWithLikedStatus, error)
 	GetAllArticles() ([]model.Article, error)
 	GetAllArticlesRandom(userId uint) ([]model.ArticleWithLikedStatus, error)
 	GetArticle(userId uint, articleId uint) (model.ArticleWithLikedStatus, error)
@@ -52,8 +52,9 @@ func (au *articleUsecase) CreateArticle(article model.Article) (model.Article, e
 	return resArticle, nil
 }
 
-func (au *articleUsecase) GetMatchArticles(userId uint) ([]model.Article, error) {
+func (au *articleUsecase) GetMatchArticles(userId uint) ([]model.ArticleWithLikedStatus, error) {
 	profile := model.Profile{}
+	favorites, err := au.fr.GetFavoritesByUserID(userId)
 	if err := au.pr.GetProfileByUserId(&profile, userId); err != nil {
 		return nil, err
 	}
@@ -79,7 +80,30 @@ func (au *articleUsecase) GetMatchArticles(userId uint) ([]model.Article, error)
 		return articleDiff[articles[i].ID] < articleDiff[articles[j].ID]
 	})
 
-	return articles, nil
+	var articlesWithStatus []model.ArticleWithLikedStatus
+	for _, article := range articles {
+		// 記事ごとにいいねの状態を判定
+		var liked bool
+		for _, favorite := range favorites {
+			if favorite.ArticleID == article.ID {
+				liked = true
+				break
+			}
+		}
+
+		// ArticleWithLikedStatus 構造体に詰める
+		articleWithStatus := model.ArticleWithLikedStatus{
+			Article: article,
+			Liked:   liked,
+		}
+
+		articlesWithStatus = append(articlesWithStatus, articleWithStatus)
+	}
+	if err != nil {
+		return nil, err
+	}
+	shuffleArticles(articles)
+	return articlesWithStatus, nil
 }
 func (au *articleUsecase) GetAllArticles() ([]model.Article, error) {
 	articles, err := au.ar.GetAllArticles()
