@@ -50,7 +50,7 @@ func AdminOnlyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func NewRouter(uc controller.IUserController, pc controller.IProfileController, ac controller.IAdminController, auc controller.IAuthController, arc controller.IArticleController) *echo.Echo {
+func NewRouter(uc controller.IUserController, pc controller.IProfileController, ac controller.IAdminController, auc controller.IAuthController, arc controller.IArticleController, fc controller.IFavoriteController) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
@@ -63,11 +63,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 		CookiePath:     "/",
 		CookieDomain:   os.Getenv("API_DOMAIN"),
 		CookieHTTPOnly: true,
-		// Skipper: func(c echo.Context) bool {
-		// 	// 特定のルートを除外する場合などに使う、スキップする条件を設定
 
-		// 	return c.Path() == "/login" || c.Path() == "/signup"
-		// },
 		//Postmanで動作確認をする場合はsecure属性をfalseにする必要がある
 		//SameSiteをnonemodeにしてしまうと自動的にsecrureがonになるためPostmanで動作確認する時はsamasiteをDefaultModeに設定する]
 		//↓【通信用】フロントとの通信の際にはコメントアウトを消しPostmanで確認する際はコメントアウトする
@@ -108,7 +104,7 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	articles.GET("/:articleId", arc.GetArticle)
 	articles.GET("/random", arc.GetAllPublicArticleRandom)
 	articles.PUT("/:articleId", arc.UpdateArticle)
-	articles.GET("/all",arc.GetAllArticles)
+	articles.GET("/all", arc.GetAllArticles)
 	//profilegroup
 	p := e.Group("/profile")
 	p.Use(echojwt.WithConfig(echojwt.Config{
@@ -119,5 +115,12 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 	p.GET("", pc.GetProfileByUserId)
 	p.PUT("", pc.UpdateProfile)
 	p.DELETE("", pc.DeleteProfile)
+	//favorite
+	favorites := e.Group("/favorites")
+	articles.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey:  []byte(os.Getenv("SECRET")),
+		TokenLookup: "cookie:token",
+	}))
+	favorites.POST("/:articleId", fc.ToggleFavorite)
 	return e
 }

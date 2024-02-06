@@ -13,7 +13,7 @@ type Article struct {
 	EarningAmount   int       `json:"earning_amount"`
 	CompanySize     int       `json:"company_size"`
 	Address         string    `json:"address"`
-	IsPublished     bool      `json:"is_published" gorm:"default:true"`
+	IsPublished     *bool      `json:"is_published" gorm:"default:true"`
 	FamilyPoint     int       `json:"family_point"`
 	InnovationPoint int       `json:"innovation_point"`
 	MarketPoint     int       `json:"market_point"`
