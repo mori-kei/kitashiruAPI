@@ -13,6 +13,7 @@ type IArticleRepository interface {
 	GetAllPublicArticles() ([]model.Article, error)
 	GetArticle(article *model.Article, articleId uint) error
 	UpdateArticle(article *model.Article, articleId uint) error
+	GetArticlesByArticleId(articleIDs []uint) ([]model.Article, error)
 }
 
 type articleRepository struct {
@@ -56,4 +57,11 @@ func (ar *articleRepository) UpdateArticle(article *model.Article, articleId uin
 		return result.Error
 	}
 	return nil
+}
+func (ar *articleRepository) GetArticlesByArticleId(articleIDs []uint) ([]model.Article, error) {
+	var articles []model.Article
+	if err := ar.db.Where("id IN ?", articleIDs).Find(&articles).Error; err != nil {
+		return nil, err
+	}
+	return articles, nil
 }

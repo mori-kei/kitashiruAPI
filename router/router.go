@@ -122,5 +122,6 @@ func NewRouter(uc controller.IUserController, pc controller.IProfileController, 
 		TokenLookup: "cookie:token",
 	}))
 	favorites.POST("/:articleId", fc.ToggleFavorite)
+	e.GET("/users/favorites", fc.GetUserAllFvorites)
 	return e
 }

@@ -22,8 +22,8 @@ func main() {
 	profileUsecase := usecase.NewProfileUsecase(profileRepository)
 	adminUsecase := usecase.NewAdminUsecase(adminRepository)
 	authUsecase := usecase.NewAuthUsecase(authRepository)
-	articleUsecase := usecase.NewArticleUsecase(articleRepository, profileRepository,favoriteRepository)
-	favoriteUsecase := usecase.NewFavoriteUsecase(favoriteRepository)
+	articleUsecase := usecase.NewArticleUsecase(articleRepository, profileRepository, favoriteRepository)
+	favoriteUsecase := usecase.NewFavoriteUsecase(favoriteRepository, articleRepository)
 	//controller
 	userController := controller.NewUserController(userUsecase)
 	profileController := controller.NewProfileController(profileUsecase)
