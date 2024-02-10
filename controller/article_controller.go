@@ -15,7 +15,6 @@ type IArticleController interface {
 	GetMatchArticles(c echo.Context) error
 	GetAllArticles(c echo.Context) error
 	GetAllPublicArticleRandom(c echo.Context) error
-
 	GetArticle(c echo.Context) error
 	UpdateArticle(c echo.Context) error
 }
@@ -34,57 +33,80 @@ func (ac *articleController) CreateArticle(c echo.Context) error {
 	if err := c.Bind(&article); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
+
 	articleRes, err := ac.au.CreateArticle(article)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+
 	return c.JSON(http.StatusCreated, articleRes)
 }
 
-func (ac *articleController) GetMatchArticles(c echo.Context) error {
+func (ac *articleController) handleUserToken(c echo.Context) (uint, error) {
 	user := c.Get("user")
 	if user == nil {
-		return c.JSON(http.StatusBadRequest, "User token not found")
+		return 0, c.JSON(http.StatusBadRequest, "User token not found")
 	}
 
 	claims, ok := user.(*jwt.Token).Claims.(jwt.MapClaims)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, "Invalid user token")
+		return 0, c.JSON(http.StatusBadRequest, "Invalid user token")
 	}
 
-	userID, ok := claims["user_id"].(float64)
+	userIDFloat, ok := claims["user_id"].(float64)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, "Invalid user ID in token")
+		return 0, c.JSON(http.StatusBadRequest, "Invalid user ID in token")
 	}
 
-	articles, err := ac.au.GetMatchArticles(uint(userID))
+	return uint(userIDFloat), nil
+}
+
+func (ac *articleController) GetMatchArticles(c echo.Context) error {
+	userID, err := ac.handleUserToken(c)
+	if err != nil {
+		return err
+	}
+
+	articles, err := ac.au.GetMatchArticles(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, articles)
 }
+
 func (ac *articleController) GetAllArticles(c echo.Context) error {
 	articles, err := ac.au.GetAllArticles()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+
 	return c.JSON(http.StatusOK, articles)
 }
+
 func (ac *articleController) GetAllPublicArticleRandom(c echo.Context) error {
-	articles, err := ac.au.GetAllArticlesRandom()
+	userID, err := ac.handleUserToken(c)
+	if err != nil {
+		return err
+	}
+
+	articles, err := ac.au.GetAllArticlesRandom(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+
 	return c.JSON(http.StatusOK, articles)
 }
+
 func (ac *articleController) GetArticle(c echo.Context) error {
 	id := c.Param("articleId")
-	articleId, _ := strconv.Atoi(id)
-	articleRes, err := ac.au.GetArticle(uint(articleId))
+	articleID, _ := strconv.Atoi(id)
+	userID, err := ac.handleUserToken(c)
+	articleRes, err := ac.au.GetArticle(userID,uint(articleID))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+
 	return c.JSON(http.StatusOK, articleRes)
 }
 
@@ -93,11 +115,13 @@ func (ac *articleController) UpdateArticle(c echo.Context) error {
 	if err := c.Bind(&article); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
+
 	id := c.Param("articleId")
-	articleId, _ := strconv.Atoi(id)
-	articleRes, err := ac.au.UpdateArticle(article, uint(articleId))
+	articleID, _ := strconv.Atoi(id)
+	articleRes, err := ac.au.UpdateArticle(article, uint(articleID))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+
 	return c.JSON(http.StatusOK, articleRes)
 }
