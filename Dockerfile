@@ -1,6 +1,10 @@
 # ベースイメージとしてGoを使用
 FROM golang:1.18-alpine
 
+# airのインストール
+RUN apk add --no-cache curl && \
+    curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s
+
 # 作業ディレクトリを設定
 WORKDIR /app
 
@@ -13,11 +17,8 @@ RUN go mod download
 # アプリケーションのソースコードをコピー
 COPY . .
 
-# アプリケーションをビルド
-RUN go build -o main .
-
 # 環境変数を設定
 ENV GO_ENV=dev
 
-# アプリケーションを実行
-CMD ["./main","go", "run", "migrate.go"]
+# マイグレーションとホットリロードを実行
+CMD ["sh", "-c", "go run migrate/migrate.go && air"]
