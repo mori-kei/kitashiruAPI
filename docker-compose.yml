@@ -11,5 +11,24 @@ services:
     restart: always
     networks:
       - lesson
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - GO_ENV=dev
+      - POSTGRES_USER=kitashiru
+      - POSTGRES_PW=kitashirupw
+      - POSTGRES_HOST=dev-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=kitashiruAPI
+    depends_on:
+      - dev-postgres
+    networks:
+      - lesson
+
 networks:
   lesson:
