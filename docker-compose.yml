@@ -24,11 +24,19 @@ services:
       - POSTGRES_HOST=dev-postgres
       - POSTGRES_PORT=5432
       - POSTGRES_DB=kitashiruAPI
-    depends_on:
-      - dev-postgres
     networks:
-      - lesson
+      - lesson  # ネットワークを追加
+  migrate:
+    image: migrate/migrate:v4.15.1
     volumes:
-      - .:/app
+      - ./db/migrations:/migrations
+    entrypoint: [
+      "migrate", 
+      "-path", "/migrations", 
+      "-database", "postgres://kitashiru:kitashirupw@dev-postgres:5432/kitashiruAPI?sslmode=disable", 
+      "up"
+    ]
+    networks:
+      - lesson  # ネットワークを追加
 networks:
   lesson:
