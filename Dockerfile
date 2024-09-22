@@ -21,4 +21,4 @@ COPY . .
 ENV GO_ENV=dev
 
 # マイグレーションとホットリロードを実行
-CMD ["sh", "-c", "go run migrate/migrate.go && air"]
+CMD ["sh", "-c", "go run infrastructure/db.go && air"]
